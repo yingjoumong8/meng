@@ -133,7 +133,7 @@ if ($.isNode()) {
 	cookiesArr = [$.getdata('CookieJD'), $.getdata('CookieJD2'), ...jsonParse($.getdata('CookiesJD') || "[]").map(item => item.cookie)].filter(item => !!item);
 }
 
-
+let map = new Map();
 
 !(async() => {
 	if (!cookiesArr[0]) {
@@ -144,7 +144,12 @@ if ($.isNode()) {
 	}
 	const envs = await getEnvs();
 	Object.keys(envs).forEach((item) => {
-	remarks.push(envs[item].remarks)
+	let pin =  envs[item].value.match(/pt_pin=([^; ]+)(?=;?)/)[1];
+	//console.log(pin);
+	let remark = envs[item].remarks;
+	//remarks.push(remark);
+	//console.log(remark);
+	map.set(pin,remark);
 	})
 	for (i = 0; i < cookiesArr.length; i++) {
 		if (cookiesArr[i]) {
@@ -188,13 +193,16 @@ if ($.isNode()) {
 			$.allexpenseBean = 0; //月支出
 			$.joylevel = 0;
 			TempBaipiao = "";
-			$.Remark = remarks[i] || '';
+			$.Remark = map.get($.pt_pin) || '';
+		
                 if ($.Remark) {
                     $.Remark = $.Remark.replace("remark=", "");
-                    $.Remark = $.Remark.replace(";", "");
+			
+                   $.Remark = $.Remark.replace(";", "");
+			
                     $.Remark = "(" + $.Remark + ")";
                 }
-			
+		
 			console.log(`******开始查询【京东账号${$.index}】${$.nickName || $.UserName}${$.Remark}*********`);
 
 			await TotalBean();
